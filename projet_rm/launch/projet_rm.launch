@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="publisher_test" pkg="projet_rm" type="publiser_pub" />
+</launch>
