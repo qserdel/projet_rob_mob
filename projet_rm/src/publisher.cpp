@@ -1,20 +1,21 @@
 # include "ros/ros.h"
-# include "std_msg/String.h"
+# include "geometry_msgs/Twist.h"
 
-ros::init(argc,argv,"publisher");
-ros::NodeHandle n;
-ros::Publisher publisher_test = n.advertise<std_msg::String>("publisher",1000);
-ros::Rate loop_rate(10);
+int main(int argc, char** argv){
 
-int count = 0;
-while(ros::ok()){
-  std_msg::String msg;
+  ros::init(argc,argv,"publisher_test");
+  ros::NodeHandle n;
+  ros::Publisher publisher_test = n.advertise<geometry_msgs::Twist>("cmd_vel",1000);
+  ros::Rate loop_rate(10);
 
-  std::stringstream ss;
-  ss<<"hello world "<<count;
-  msg.data = ss.str();
-  publisher_test.publish(msg);
-  ROS_INFO("%s", msg.data.c_str());
-  ros::spinOnce();
-  loop_rate.sleep();
+  while(ros::ok()){
+    geometry_msgs::Twist cmd;
+
+    cmd.linear.x = 1;
+    publisher_test.publish(cmd);
+    ROS_INFO("%f", cmd.linear.x);
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+
 }

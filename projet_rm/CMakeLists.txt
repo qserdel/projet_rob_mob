@@ -8,9 +8,12 @@ project(projet_rm)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED #COMPONENTS
-#	roscpp
-#	std_msgs
-#	message_generation
+	roscpp
+	rospy
+	geometry_msgs
+	std_msgs
+	message_generation
+	genmsg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -68,10 +71,10 @@ find_package(catkin REQUIRED #COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -92,6 +95,9 @@ find_package(catkin REQUIRED #COMPONENTS
 #   cfg/DynReconf1.cfg
 #   cfg/DynReconf2.cfg
 # )
+
+
+#add_dependencies(publisher_test beginner_tutorials_generate_messages_cpp)
 
 ###################################
 ## catkin specific configuration ##
@@ -116,8 +122,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
+ include ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -133,7 +138,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/projet_rm_node.cpp)
+add_executable(publisher_test src/publisher.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -146,9 +151,7 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(publisher_test ${catkin_LIBRARIES})
 
 #############
 ## Install ##
