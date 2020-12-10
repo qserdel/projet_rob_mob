@@ -74,6 +74,7 @@ int main(int argc, char **argv)
     cvWaitKey(0);
 
     cv::destroyWindow(OPENCV_WINDOW);*/
+    ros::spin();
 
     return 0;
 }
