@@ -5,13 +5,27 @@
 #include <iostream>
 #include <memory>
 #include "gridmap2d.h"
+#include <mapping/BinaryMap.h>
 //#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include "opencv2/highgui.hpp"
+//#include <opencv2/imgproc.hpp>
+//#include "opencv2/highgui.hpp"
 
 using namespace gridmap_2d;
 
+static nav_msgs::OccupancyGrid binary_map;
+static GridMap2D gridmap;
+
 //static const std::string OPENCV_WINDOW = "Image window";
+bool publish(mapping::BinaryMap::Request &req, mapping::BinaryMap::Response &res)
+{
+    if (!gridmap.binaryMap().empty())
+    {
+        //std::cout << "je suis là\n";
+        res.map = binary_map;
+        return true;
+    }
+    else return false;
+}
 
 int main(int argc, char **argv)
 {
@@ -25,10 +39,11 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::ServiceClient client = n.serviceClient<nav_msgs::GetMap>("static_map");
     nav_msgs::GetMap srv;
-    nav_msgs::OccupancyGrid map;
-    GridMap2D gridmap;
+    //nav_msgs::OccupancyGrid map;
+    //GridMap2D gridmap;
 
-    ros::Publisher map_pub = n.advertise<nav_msgs::OccupancyGrid>("binary_map", 1000);
+    //ros::Publisher map_pub = n.advertise<nav_msgs::OccupancyGrid>("binary_map", 5);
+    ros::ServiceServer map_srv = n.advertiseService("binary_map", publish);
 
     cv::Mat map_dilate;
     int erosion_size = 3;
@@ -49,17 +64,18 @@ int main(int argc, char **argv)
     if (client.call(srv))
     {
         ROS_INFO("Service GetMap succeeded");
-        map = srv.response.map;
-        gridmap = GridMap2D(map, false, 60);
+        binary_map = srv.response.map;
+        gridmap = GridMap2D(binary_map, false, 60);
 
         cv::erode(gridmap.binaryMap(), map_dilate, element);
         cv::dilate(map_dilate, map_dilate, element2);
         cv::erode(map_dilate, map_dilate, element3);
 
         gridmap.setMap(map_dilate);
-        map = gridmap.toOccupancyGridMsg();
-        map_pub.publish(map);
-        std::cout << "map published\n";
+        binary_map = gridmap.toOccupancyGridMsg();
+        //map_pub.publish(map);
+        //binary_map.map = map;
+        //std::cout << "map published\n";
     }
     else
     {
@@ -67,13 +83,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    /*std::cout << "Map récupérée\n";
-
-    cv::namedWindow(OPENCV_WINDOW);
-    imshow(OPENCV_WINDOW, gridmap.binaryMap());
-    cvWaitKey(0);
-
-    cv::destroyWindow(OPENCV_WINDOW);*/
     ros::spin();
 
     return 0;
