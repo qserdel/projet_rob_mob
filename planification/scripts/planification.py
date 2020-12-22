@@ -11,7 +11,7 @@ import numpy as np
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry
-from mapping.srv import * 
+from mapping.srv import *
 #from planification import listePoints
 
 class Env:
@@ -208,9 +208,8 @@ def simplify_path(path_tree, env):
     node = node.successors[0]
     path_tree.all_nodes.append(node)
 
-void positionCallback(const nav_msgs::Odometry msg){
-  pos = msg.pose.pose;
-}
+def positionCallback(msg):
+    pos = msg.pose.pose
 
 def objectiveCallback(objective):
     obj = objective
