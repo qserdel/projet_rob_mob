@@ -9,17 +9,15 @@ project(mapping)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED#COMPONENTS
 	roscpp
-	rospy
 	geometry_msgs
   nav_msgs
 	std_msgs
-	message_generation
-	genmsg
 	rosconsole
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system)
+#find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(OpenCV REQUIRED)
 
@@ -60,11 +58,10 @@ find_package(OpenCV REQUIRED)
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   BinaryMap.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -74,10 +71,11 @@ find_package(OpenCV REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   nav_msgs
+   std_msgs  # Or other packages containing msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -111,8 +109,9 @@ find_package(OpenCV REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES mapping
-  CATKIN_DEPENDS roscpp rosconsole nav_msgs
-  DEPENDS system_lib OpenCV
+  CATKIN_DEPENDS roscpp rosconsole nav_msgs message_runtime
+  #DEPENDS system_lib OpenCV
+  DEPENDS OpenCV
 )
 
 ###########
@@ -122,7 +121,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-    include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
+  include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -138,7 +137,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/mapper_client.cpp src/gridmap2d.cpp)
+add_executable(mapper src/mapper_client.cpp src/gridmap2d.cpp)
+add_executable(visu src/visualisator.cpp src/gridmap2d.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,10 +148,15 @@ add_executable(${PROJECT_NAME}_node src/mapper_client.cpp src/gridmap2d.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(mapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
+add_dependencies(visu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_node
+target_link_libraries(mapper
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+target_link_libraries(visu
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
