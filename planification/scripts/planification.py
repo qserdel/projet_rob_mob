@@ -209,7 +209,7 @@ def simplify_path(path_tree, env):
     path_tree.all_nodes.append(node)
 
 def positionCallback(msg):
-    pos = msg.pose.pose
+    pos = msg.pose.position
 
 def objectiveCallback(objective):
     obj = objective
@@ -233,7 +233,7 @@ rospy.Subscriber("objective",Point,objectiveCallback)
 
 env = Env()
 env.mat = map
-t = Tree([pos.position.x,pos.position.y])
+t = Tree([pos.x,pos.y])
 t2 = Tree([obj.x,obj.y])
 
 node_t, node_t2 = rrt_connect(t,t2,env)
