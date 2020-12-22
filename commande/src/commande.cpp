@@ -9,13 +9,16 @@
 static float K = 0.2;
 static float dist_p = 0.5;
 
-static float point_x = 5;
-static float point_y = -5;
 
 geometry_msgs::Pose pos ;
+geometry_msgs::Point checkpoint ;
 
 void positionCallback(const nav_msgs::Odometry msg){
   pos = msg.pose.pose;
+}
+
+void objectiveCallback(const geometry_msgs::Point msg){
+  checkpoint = msg;
 }
 
 int main(int argc, char** argv){
@@ -24,8 +27,10 @@ int main(int argc, char** argv){
   ros::NodeHandle n;
   ros::Publisher commande_pub = n.advertise<geometry_msgs::Twist>("cmd_vel",1000);
   ros::Subscriber position_sub = n.subscribe("odom",1000,positionCallback);
-  //ros::ServiceClient point_client = n.
+  ros::Subscriber checkpoint_sub = n.subscribe("checkpoints",1000,positionCallback);
   ros::Rate loop_rate(10);
+  checkpoint.x = 5;
+  checkpoint.y = 5;
 
   while(ros::ok()){
 
@@ -37,8 +42,8 @@ int main(int argc, char** argv){
     ROS_INFO("y : %f", pos.position.y);
     ROS_INFO("theta : %f", theta);
 
-    float err_x = point_x - pos.position.x;
-    float err_y = point_y - pos.position.y;
+    float err_x = checkpoint.x - pos.position.x;
+    float err_y = checkpoint.y - pos.position.y;
 
     float v_des_x = K*err_x;
     float v_des_y = K*err_y;
