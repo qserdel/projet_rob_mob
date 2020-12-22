@@ -2,11 +2,12 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <opencv2/imgproc.hpp>
+#include "opencv2/highgui.hpp"
+
 #include "nav_msgs/OccupancyGrid.h"
 #include "gridmap2d.h"
 #include <mapping/BinaryMap.h>
-#include <opencv2/imgproc.hpp>
-#include "opencv2/highgui.hpp"
 
 using namespace gridmap_2d;
 
@@ -14,35 +15,36 @@ static const std::string OPENCV_WINDOW = "Display window";
 static GridMap2D gridmap;
 static cv::Mat display_map;
 
-void map_callback(const nav_msgs::OccupancyGrid &msg)
+/*void map_callback(const nav_msgs::OccupancyGrid &msg)
 {
-    std::cout << "map received\n";
+    ROS_INFO("Map received");
+
+    // récupération de la map
     gridmap = GridMap2D(msg);
+
+    // récupération de la matrice openCV binarisée et dilatée
     display_map = gridmap.binaryMap();
-    //cv::imshow(OPENCV_WINDOW, display_map);
-    //cvWaitKey(1);
-}
+}*/
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "visu");
     if (argc != 1)
     {
-        ROS_INFO("***ERROR: usage: visualisation with no args");
+        ROS_ERROR("***ERROR: usage: visualisation with no args");
         return 1;
     }
 
     ros::NodeHandle n;
 
-    cv::namedWindow(OPENCV_WINDOW);
-    //ros::Subscriber map_sub = n.subscribe("binary_map", 5, map_callback);
 
     ros::ServiceClient map_client = n.serviceClient<mapping::BinaryMap>("binary_map");
     mapping::BinaryMap map_srv;
 
-    ros::Rate loop_rate(0.5);
-
-    //ros::spin();
+    
+    ros::Rate loop_rate(1);
+    
+    cv::namedWindow(OPENCV_WINDOW);
     while (ros::ok())
     {
         if (map_client.call(map_srv))
@@ -51,7 +53,7 @@ int main(int argc, char **argv)
             display_map = gridmap.binaryMap();
         }
         else{
-            ROS_ERROR("Service BinaryMap unavailable");
+            ROS_INFO("Service BinaryMap unavailable");
         }
         if (!display_map.empty())
         {
