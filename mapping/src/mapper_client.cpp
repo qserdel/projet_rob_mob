@@ -44,21 +44,19 @@ int main(int argc, char **argv)
     nav_msgs::GetMap srv;
 
     ros::ServiceServer map_srv = n.advertiseService("binary_map", publish);
+    ros::Rate static_map_rate(1);
 
     // case of a static map
-    if (client.call(srv))
+    while (!client.call(srv))
     {
-        ROS_INFO("Service GetMap succeeded");
-        binary_map = srv.response.map;
-        gridmap = GridMap2D(binary_map, false, 60);
-        gridmap.inflateMap(0.6);
-        binary_map = gridmap.toOccupancyGridMsg();
+        ros::spinOnce();
+        static_map_rate.sleep();
     }
-    else
-    {
-        ROS_ERROR("Service GetMap failed");
-        return 1;
-    }
+    ROS_INFO("Service GetMap succeeded");
+    binary_map = srv.response.map;
+    gridmap = GridMap2D(binary_map, false, 60);
+    gridmap.inflateMap(0.6);
+    binary_map = gridmap.toOccupancyGridMsg();
 
     ros::spin();
 
