@@ -12,7 +12,7 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry
 from mapping.srv import *
-#from planification import listePoints
+from planification import ListePoints
 
 class Env:
     mat = np.zeros([205,205])
@@ -209,7 +209,7 @@ def simplify_path(path_tree, env):
     path_tree.all_nodes.append(node)
 
 def positionCallback(msg):
-    pos = msg.pose.position
+    pos = msg.pose.pose.position
 
 def objectiveCallback(objective):
     obj = objective
@@ -219,6 +219,8 @@ def objectiveCallback(objective):
 rospy.init_node('plannification',anonymous=False)
 
 rospy.Subscriber("odom",Odometry,positionCallback)
+
+trajectoryPub = rospy.Publisher('checkpoints',ListePoints,queue_size = 10)
 
 # service de recuperation de la matrice map
 rospy.wait_for_service('binary_map')
@@ -242,7 +244,12 @@ path_tree = find_path(node_t,node_t2);
 
 simplify_path(path_tree,env)
 
+checkpoints = ListePoints()
+node = path_tree
+while node.sucessors != []:
+    point = Point(node.state[0],node.state[1],0)
+    checkpoints.append(point)
 
 while not rospy.is_shutdown():
 
-    trajectoryPub = rospy.Publisher('checkpoints',Point,queue_size = 10)
+    trajectoryPub.publish()

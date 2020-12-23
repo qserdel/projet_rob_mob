@@ -4,6 +4,7 @@
 # include "geometry_msgs/Point.h"
 # include <cmath>
 # include "nav_msgs/Odometry.h"
+# include "planification/ListePoints.h"
 
 
 static float K = 0.2;
