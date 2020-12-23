@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     ros::ServiceServer map_srv = n.advertiseService("binary_map", publish);
 
     // OpenCV treatment
-    cv::Mat map_dilate;
+    /*cv::Mat map_dilate;
     int erosion_size = 3;
     float dilation_size = 3.5;
     int erosion_size2 = 20;
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
     cv::Mat element3 = cv::getStructuringElement(cv::MORPH_ELLIPSE,
                                                  cv::Size(2 * erosion_size2 + 1, 2 * erosion_size2 + 1),
-                                                 cv::Point(erosion_size2, erosion_size2));
+                                                 cv::Point(erosion_size2, erosion_size2));*/
 
     // case of a static map
     if (client.call(srv))
@@ -73,11 +73,12 @@ int main(int argc, char **argv)
         binary_map = srv.response.map;
         gridmap = GridMap2D(binary_map, false, 60);
 
-        cv::erode(gridmap.binaryMap(), map_dilate, element);
+        /*cv::erode(gridmap.binaryMap(), map_dilate, element);
         cv::dilate(map_dilate, map_dilate, element2);
-        cv::erode(map_dilate, map_dilate, element3);
+        cv::erode(map_dilate, map_dilate, element3);*/
+        gridmap.inflateMap(0.6);
 
-        gridmap.setMap(map_dilate);
+        //gridmap.setMap(map_dilate);
         binary_map = gridmap.toOccupancyGridMsg();
     }
     else
