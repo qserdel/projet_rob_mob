@@ -31,17 +31,6 @@ struct Robot
 };
 static Robot robot;
 
-/*void map_callback(const nav_msgs::OccupancyGrid &msg)
-{
-    ROS_INFO("Map received");
-
-    // récupération de la map
-    gridmap = GridMap2D(msg);
-
-    // récupération de la matrice openCV binarisée et dilatée
-    display_map = gridmap.binaryMap();
-}*/
-
 void odomCallback(const nav_msgs::Odometry &msg)
 {
     geometry_msgs::Pose robot_pos = msg.pose.pose;
