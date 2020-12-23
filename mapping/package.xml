@@ -53,6 +53,7 @@
   <depend>roscpp</depend>
   <depend>rosconsole</depend>
   <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>libopencv-dev</depend>
   <exec_depend>message_runtime</exec_depend>
 

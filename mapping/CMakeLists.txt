@@ -109,7 +109,7 @@ find_package(OpenCV REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES mapping
-  CATKIN_DEPENDS roscpp rosconsole nav_msgs message_runtime
+  CATKIN_DEPENDS roscpp rosconsole nav_msgs message_runtime geometry_msgs
   #DEPENDS system_lib OpenCV
   DEPENDS OpenCV
 )
