@@ -5,6 +5,7 @@
 # include <cmath>
 # include "nav_msgs/Odometry.h"
 # include "planification/ListePoints.h"
+# include "planification/Checkpoints.h"
 
 
 static float K = 0.2;
@@ -12,14 +13,10 @@ static float dist_p = 0.5;
 
 
 geometry_msgs::Pose pos ;
-geometry_msgs::Point checkpoint ;
+planification::ListePoints checkpoints ;
 
-void positionCallback(const nav_msgs::Odometry msg){
+void positionCallback(const nav_msgs::Odometry &msg){
   pos = msg.pose.pose;
-}
-
-void objectiveCallback(const geometry_msgs::Point msg){
-  checkpoint = msg;
 }
 
 int main(int argc, char** argv){
@@ -28,13 +25,31 @@ int main(int argc, char** argv){
   ros::NodeHandle n;
   ros::Publisher commande_pub = n.advertise<geometry_msgs::Twist>("cmd_vel",1000);
   ros::Subscriber position_sub = n.subscribe("odom",1000,positionCallback);
-  ros::Subscriber checkpoint_sub = n.subscribe("checkpoints",1000,positionCallback);
+  ros::ServiceClient checkpoints_client = n.serviceClient<planification::Checkpoints>("checkpoints");
+  planification::Checkpoints srv;
   ros::Rate loop_rate(10);
-  checkpoint.x = 5;
-  checkpoint.y = 5;
+
+  int indice_point = 0;
+  if(checkpoints_client.call(srv))
+  {
+    checkpoints = srv.response.points;
+  }
+  else
+  {
+    ROS_ERROR("failed to call service checkpoints");
+    return 1;
+  }
+  geometry_msgs::Point point = checkpoints.points[indice_point];
+  ROS_INFO("x : %f", point.x);
+  ROS_INFO("y : %f", point.y);
 
   while(ros::ok()){
 
+    if(sqrt(pow(point.x - pos.position.x,2)+pow(point.y - pos.position.y,2)) <= 0.1 && indice_point+1 < checkpoints.points.size()){
+      indice_point++;
+      point = checkpoints.points[indice_point];
+      ROS_INFO("checkpoint : [%f,%f]", point.x,point.y);
+    }
     //conversion quaternions -> lacet
     double siny_cosp = 2*(pos.orientation.w*pos.orientation.z + pos.orientation.x*pos.orientation.y);
     double cosy_cosp = 1-2*(pos.orientation.y*pos.orientation.y + pos.orientation.z*pos.orientation.z);
@@ -43,8 +58,8 @@ int main(int argc, char** argv){
     ROS_INFO("y : %f", pos.position.y);
     ROS_INFO("theta : %f", theta);
 
-    float err_x = checkpoint.x - pos.position.x;
-    float err_y = checkpoint.y - pos.position.y;
+    float err_x = point.x - pos.position.x;
+    float err_y = point.y - pos.position.y;
 
     float v_des_x = K*err_x;
     float v_des_y = K*err_y;

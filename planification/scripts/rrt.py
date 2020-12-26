@@ -12,36 +12,13 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry
 from mapping.srv import *
-from planification import ListePoints
+from planification.msg import ListePoints
+from planification.srv import Checkpoints
 
 class Env:
-    mat = np.zeros([205,205])
-    # A 2D environment with bounds [0, 200] x [0, 200]
-    def __init__(self, walls=[]):
-        self.walls = [([6, 6], [200, 6]),
-                      ([200, 6], [200, 200]),
-                      ([200, 200], [6, 200]),
-                      ([6, 200], [6, 6])] + walls
 
-    @staticmethod
-    def intersect(a, b, c, d):
-        # If line segments ab and cd have a true intersection, return the intersection point. Otherwise, return False
-        # a, b, c and d are 2D points of the form [x, y]
-        x1, x2, x3, x4 = a[0], b[0], c[0], d[0]
-        y1, y2, y3, y4 = a[1], b[1], c[1], d[1]
-        denom = (x4 - x3) * (y1 - y2) - (x1 - x2) * (y4 - y3)
-        if denom == 0:
-            return False
-        else:
-            t = ((y3 - y4) * (x1 - x3) + (x4 - x3) * (y1 - y3)) / denom
-            if t <= 0 or t >= 1:
-                return False
-            else:
-                t = ((y1 - y2) * (x1 - x3) + (x2 - x1) * (y1 - y3)) / denom
-                if t <= 0 or t >= 1:
-                    return False
-                else:
-                    return [x3 + t * (x4 - x3), y3 + t * (y4 - y3)]
+    def __init__(self,map):
+        self.mat = map
 
     @staticmethod
     def dist(a, b):
@@ -60,18 +37,16 @@ class Env:
     def step(self, state, action, full=False):
         candidate = [state[0] + action[0], state[1] + action[1]]
         dist = np.infty
-        for w in self.walls:  # Naive way to check for collisions
-            s1 = discretisation_segment(state[0],state[1],candidate[0],candidate[1])
-            s2 = discretisation_segment(w[0][0],w[0][1],w[1][0],w[1][1])
-            pt = self.intersect_discret(s1)
-            if pt:
-                candidate = pt
-                return False
+        s1 = discretisation_segment(state[0],state[1],candidate[0],candidate[1])
+        pt = self.intersect_discret(s1)
+        if pt:
+            candidate = pt
+            return False
         if full:
             return candidate
         else:
             newstate = [state[0] + (candidate[0] - state[0]), state[1] + (candidate[1] - state[1])]
-            if Env.dist(state, newstate) < 0.1:  # Reject steps that are too small
+            if Env.dist(state, newstate) < 0.5 or Env.dist(state,newstate) > 10:  # Reject steps that are too small or too big
                 return False
             else:
                 return newstate
@@ -79,7 +54,7 @@ class Env:
 
     def intersect_discret(self,s1): #retourne l'intersection du segments discretises avec l'environement si elle existe, False sinon
       for i in range(len(s1)):
-        if self.mat[s1[i][0],len(self.mat[0])-s1[i][1]]>100:
+        if not self.mat[int(s1[i][0]),int(s1[i][1])] == 0 :
           return [s1[i]]
       return False
 
@@ -90,7 +65,7 @@ class Tree:
         self.state = init_state
         self.successors = []
         self.root = root
-        self.all_nodes = []
+        self.all_nodes = [self]
         self.distance_root = []
 
 
@@ -117,7 +92,7 @@ def discretisation_segment(x1,y1,x2,y2):
 def rrt_expansion(t, env, action_type, cible):
     nearest_neighbor = t
     if(action_type == 'random'):
-      sample = [random.uniform(0,200),random.uniform(0,200)]
+      sample = [random.uniform(0,w),random.uniform(0,h)]
       d = Env.dist(t.state, sample)
       for s in t.all_nodes:  # Naive way to get the nearest neighbor
         d_tmp = Env.dist(s.state, sample)
@@ -134,6 +109,7 @@ def rrt_expansion(t, env, action_type, cible):
               nearest_neighbor = s
               d = d_tmp
       action = env.oriented_action(nearest_neighbor.state,sample,d)
+      rospy.loginfo("distance min : %f\t--> 0",d)
     new_state = env.step(nearest_neighbor.state, action)
     if new_state:
         new_node = Tree(new_state, nearest_neighbor, False)
@@ -147,11 +123,11 @@ def rrt_connect(t,t2,env):
   joint = False
   rrt_expansion(t, env, 'random',t2.state)
   rrt_expansion(t2, env, 'random',t.state)
-  while not joint:
+  while not (joint or i==1000):
       if(i%2 == 0):
         cible = t.all_nodes[len(t.all_nodes)-1]
-        rrt_expansion(t, env, 'random',cible.state)
         rrt_expansion(t2, env, 'oriented',cible.state)
+        rrt_expansion(t, env, 'random',cible.state)
       else :
         cible = t2.all_nodes[len(t2.all_nodes)-1]
         rrt_expansion(t, env, 'oriented',cible.state)
@@ -165,6 +141,9 @@ def rrt_connect(t,t2,env):
         node_t = t.all_nodes[len(t.all_nodes)-2]
         node_t2 = t2.all_nodes[len(t2.all_nodes)-1]
       i+=1
+  if(i==1000):
+    node_t = t.all_nodes[len(t.all_nodes)-1]
+    node_t2 = t2.all_nodes[len(t2.all_nodes)-2]
   return node_t, node_t2
 
 # Cree le chemin entre les 2 racines
@@ -183,10 +162,12 @@ def find_path(node_t,node_t2):
     node_t2 = node_t2.parent
     path_t2.append(node_t2)
 
-  path_t[0].successors=[path_t2[1]]
+  #path_t[0].successors=[path_t2[1]]
+  path_t[0].successors=[path_t2[0]]
 
   for i in range(1,len(path_t2)-1):
-    path_t2[i].successors = [path_t2[i+1]]
+    #path_t2[i].successors = [path_t2[i+1]]
+    path_t2[i].successors = [path_t2[i]]
 
   path_t2[len(path_t2)-1].successors = []
 
@@ -214,42 +195,92 @@ def positionCallback(msg):
 def objectiveCallback(objective):
     obj = objective
 
+def send_checkpoints(self):
+    return checkpoints
+
+def transcription_map_repere(pixel,map_origin,resolution):
+    x = pixel[0]*resolution+map_origin.x
+    y = pixel[1]*resolution+map_origin.y
+    point = Point()
+    point.x = x
+    point.y = y
+    point.z = 0
+    rospy.loginfo("pixel : [%d,%d] -> [%f,%f]",pixel[0],pixel[1],point.x,point.y)
+    return point
+
+def transcription_repere_map(point,map_origin,resolution):
+    x = int((point.x-map_origin.x)/resolution)
+    y = int((point.y-map_origin.y)/resolution)
+    pixel = [x,y]
+    rospy.loginfo("point : [%f,%f] -> [%d,%d]",point.x,point.y,pixel[0],pixel[1])
+    return pixel
+
 # main
+if __name__ == '__main__':
+    rospy.init_node('planification',anonymous=False)
+    pos = Point()
+    rospy.Subscriber("odom",Odometry,positionCallback)
+    rospy.Subscriber("objective",Point,objectiveCallback)
+    obj = Point()
+    obj.x = -10
+    obj.y = -2
+    obj.x = 10
+    obj.y = 10
 
-rospy.init_node('plannification',anonymous=False)
+    while not rospy.is_shutdown():
+        rospy.loginfo("on entre dans la boucle du rrt")
+        # service de recuperation de la matrice map
+        rospy.wait_for_service('binary_map')
+        rospy.loginfo("binary map recuperee")
+        try:
+            binary_map = rospy.ServiceProxy('binary_map', BinaryMap)
+            w = binary_map().map.info.width
+            h = binary_map().map.info.height
+            rospy.loginfo("w = %d h = %d",w,h)
+            map = np.zeros([h,w])
+            bm = binary_map().map.data
+            map_origin = binary_map().map.info.origin.position
+            map_resolution = binary_map().map.info.resolution
+            rospy.loginfo("origine : [%f,%f]",map_origin.x,map_origin.y)
+            rospy.loginfo("resolution : %f",map_resolution)
+            for i in range (h):
+                if i%100==0:
+                    rospy.loginfo("transcription binary_map : %d/%d",i,h)
+                map[i] = bm[i*h:i*h+w]
+            print("binary map ok")
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
 
-rospy.Subscriber("odom",Odometry,positionCallback)
 
-trajectoryPub = rospy.Publisher('checkpoints',ListePoints,queue_size = 10)
+        env = Env(map)
+        pos_pixel = transcription_repere_map(pos,map_origin,map_resolution)
+        obj_pixel = transcription_repere_map(obj,map_origin,map_resolution)
+        t = Tree(pos_pixel)
+        t2 = Tree(obj_pixel)
 
-# service de recuperation de la matrice map
-rospy.wait_for_service('binary_map')
-try:
-    binary_map = rospy.ServiceProxy('binary_map', BinaryMap)
-    map = binary_map().map
-except rospy.ServiceException as e:
-    print("Service call failed: %s"%e)
+        print("lancement du rrt connect")
+        node_t, node_t2 = rrt_connect(t,t2,env)
+        rospy.loginfo("rrt connect fait")
 
-rospy.Subscriber("objective",Point,objectiveCallback)
+        path_tree = find_path(node_t,node_t2);
+        rospy.loginfo("chemin trouve")
 
+        simplify_path(path_tree,env)
+        rospy.loginfo("chemin simplifie")
 
-env = Env()
-env.mat = map
-t = Tree([pos.x,pos.y])
-t2 = Tree([obj.x,obj.y])
-
-node_t, node_t2 = rrt_connect(t,t2,env)
-
-path_tree = find_path(node_t,node_t2);
-
-simplify_path(path_tree,env)
-
-checkpoints = ListePoints()
-node = path_tree
-while node.sucessors != []:
-    point = Point(node.state[0],node.state[1],0)
-    checkpoints.append(point)
-
-while not rospy.is_shutdown():
-
-    trajectoryPub.publish()
+        checkpoints = ListePoints()
+        node = path_tree
+        while node.successors != []:
+            pixel = [node.state[0],node.state[1]]
+            point = transcription_map_repere(pixel,map_origin,map_resolution)
+            rospy.loginfo("checkpoint ajoute : [ %f , %f ]",point.x,point.y)
+            checkpoints.points.append(point)
+            node = node.successors[0]
+        pixel = [node.state[0],node.state[1]]
+        point = transcription_map_repere(pixel,map_origin,map_resolution)
+        rospy.loginfo("checkpoint ajoute : [ %f , %f ]",point.x,point.y)
+        checkpoints.points.append(point)
+        rospy.loginfo("liste des checkpoints creee")
+        checkpointService = rospy.Service('checkpoints',Checkpoints,send_checkpoints)
+        rospy.loginfo("liste des checkpoints envoyee !")
+        rospy.spin()
