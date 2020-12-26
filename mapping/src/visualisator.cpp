@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <opencv2/imgproc.hpp>
-#include "opencv2/highgui.hpp"
+#include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 
 #include "nav_msgs/OccupancyGrid.h"
@@ -34,8 +34,14 @@ static Robot robot;
 void odomCallback(const nav_msgs::Odometry &msg)
 {
     geometry_msgs::Pose robot_pos = msg.pose.pose;
-    robot.pos.x = robot_pos.position.x;
-    robot.pos.y = robot_pos.position.y;
+    unsigned int mx, my;
+    if (gridmap.inMapBounds(robot_pos.position.x, robot_pos.position.y))
+    {
+        gridmap.worldToMap(robot_pos.position.x, robot_pos.position.y, mx, my);
+        robot.pos.x = my;
+        robot.pos.y = mx;
+    }
+    //std::cout << robot.pos << "\n";
 }
 
 int main(int argc, char **argv)
@@ -54,15 +60,15 @@ int main(int argc, char **argv)
     mapping::BinaryMap map_srv;
 
     // Subscriber du topic /odom
-    ros::Subscriber odom_sub = n.subscribe("odom", 30, odomCallback);
+    ros::Subscriber odom_sub = n.subscribe("odom", 1000, odomCallback);
     robot.pos = cv::Point();
-    robot.radius = 5;
+    robot.radius = 10;
     robot.color = cv::Vec3b(100, 0, 0);
 
     ros::Rate loop_rate(30);
     ros::Rate map_rate(1);
 
-    // OpenCV winddow
+    // OpenCV window
     cv::namedWindow(OPENCV_WINDOW);
 
     // Wait to receive the map
@@ -73,16 +79,19 @@ int main(int argc, char **argv)
     }
     // Loading of the binary map
     gridmap = GridMap2D(map_srv.response.map);
-    display_map = gridmap.binaryMap();
+    //display_map = gridmap.binaryMap();
+    cv::cvtColor(gridmap.binaryMap(), display_map, cv::COLOR_GRAY2RGB);
 
     // continuous display
     while (ros::ok())
     {
         if (!display_map.empty())
         {
+            display_map = cv::Mat::zeros(display_map.rows, display_map.cols, CV_8U);
+            cv::cvtColor(gridmap.binaryMap(), display_map, cv::COLOR_GRAY2RGB);
             if (robot.pos.x != 0 && robot.pos.y != 0)
             {
-                cv::circle(display_map, robot.pos, robot.radius, robot.color);
+                cv::circle(display_map, robot.pos, robot.radius, robot.color, CV_FILLED);
             }
             cv::imshow(OPENCV_WINDOW, display_map);
             cvWaitKey(1);

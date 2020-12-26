@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     ROS_INFO("Service GetMap succeeded");
     binary_map = srv.response.map;
     gridmap = GridMap2D(binary_map, false, 60);
-    gridmap.inflateMap(0.6);
+    gridmap.inflateMap(0.7);
     binary_map = gridmap.toOccupancyGridMsg();
 
     ros::spin();
