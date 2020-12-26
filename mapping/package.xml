@@ -57,6 +57,9 @@
   <depend>libopencv-dev</depend>
   <exec_depend>message_runtime</exec_depend>
 
+  <build_depend>planification</build_depend>
+  <exec_depend>planification</exec_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
