@@ -75,7 +75,7 @@ void GridMap2D::setMap(const nav_msgs::OccupancyGrid& grid_map, bool unknown_as_
   std::vector<signed char>::const_iterator mapDataIter = grid_map.data.begin();
 
   //TODO check / param
-  unsigned char map_occ_thres = 70;
+  unsigned char map_occ_thres = threshold;
 
   // iterate over map, store in image
   // (0,0) is lower left corner of OccupancyGrid

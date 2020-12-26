@@ -134,7 +134,7 @@ public:
   inline const CvSize size() const {return cvSize(m_binaryMap.size[0], m_binaryMap.size[1]);}
 
   const static uchar FREE = 255;  ///< char value for "free": 255
-  const static uchar OCCUPIED = 0; ///< char value for "free": 0
+  const static uchar OCCUPIED = 0; ///< char value for "occupied": 0
 
 protected:
   cv::Mat m_binaryMap;	///< binary occupancy map. 255: free, 0 occupied.
