@@ -11,7 +11,7 @@ import numpy as np
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry
-from mapping.srv import *
+from mapping.srv import BinaryMap
 from planification.msg import ListePoints
 from planification.srv import Checkpoints
 
@@ -26,12 +26,12 @@ class Env:
 
     @staticmethod
     def random_action():
-        return [random.uniform(-1, 1), random.uniform(-1, 1)]
+        return [random.uniform(0, w), random.uniform(0, h)]
 
     @staticmethod
-    def oriented_action(state,cible,d):
-        norm = max(1,np.sqrt(np.square(cible[0]-state[0])+np.square(cible[1]-state[1])))
-        return [1*(cible[0]-state[0])/norm,1*(cible[1]-state[1])/norm]
+    def oriented_action(state,cible):
+        #norm = max(10,np.sqrt(np.square(cible[0]-state[0])+np.square(cible[1]-state[1])))
+        return [(cible[0]-state[0]),(cible[1]-state[1])]
 
 
     def step(self, state, action, full=False):
@@ -46,7 +46,7 @@ class Env:
             return candidate
         else:
             newstate = [state[0] + (candidate[0] - state[0]), state[1] + (candidate[1] - state[1])]
-            if Env.dist(state, newstate) < 0.5 or Env.dist(state,newstate) > 10:  # Reject steps that are too small or too big
+            if Env.dist(state, newstate) < 0.5 or Env.dist(state,newstate) > 50:  # Reject steps that are too small or too big
                 return False
             else:
                 return newstate
@@ -54,7 +54,7 @@ class Env:
 
     def intersect_discret(self,s1): #retourne l'intersection du segments discretises avec l'environement si elle existe, False sinon
       for i in range(len(s1)):
-        if not self.mat[int(s1[i][0]),int(s1[i][1])] == 0 :
+        if not self.mat[int(s1[i][0])][int(s1[i][1])] == 0 :
           return [s1[i]]
       return False
 
@@ -99,7 +99,7 @@ def rrt_expansion(t, env, action_type, cible):
         if d_tmp < d:
             nearest_neighbor = s
             d = d_tmp
-      action = env.oriented_action(nearest_neighbor.state,sample,d)
+      action = env.oriented_action(nearest_neighbor.state,sample)
     else :
       sample = cible
       d = Env.dist(t.state, sample)
@@ -108,8 +108,8 @@ def rrt_expansion(t, env, action_type, cible):
           if d_tmp < d:
               nearest_neighbor = s
               d = d_tmp
-      action = env.oriented_action(nearest_neighbor.state,sample,d)
-      rospy.loginfo("distance min : %f\t--> 0",d)
+      action = env.oriented_action(nearest_neighbor.state,sample)
+      #rospy.loginfo("distance min : %f\t--> 0",d)
     new_state = env.step(nearest_neighbor.state, action)
     if new_state:
         new_node = Tree(new_state, nearest_neighbor, False)
@@ -162,13 +162,13 @@ def find_path(node_t,node_t2):
     node_t2 = node_t2.parent
     path_t2.append(node_t2)
 
-  #path_t[0].successors=[path_t2[1]]
+  path_t[0].successors=[path_t2[1]]
   path_t[0].successors=[path_t2[0]]
 
   for i in range(1,len(path_t2)-1):
-    #path_t2[i].successors = [path_t2[i+1]]
-    path_t2[i].successors = [path_t2[i]]
-
+    path_t2[i].successors = [path_t2[i+1]]
+    #path_t2[i].successors = [path_t2[i]]
+  
   path_t2[len(path_t2)-1].successors = []
 
   node_t.all_nodes.append(path_t2)
@@ -237,7 +237,7 @@ if __name__ == '__main__':
             w = binary_map().map.info.width
             h = binary_map().map.info.height
             rospy.loginfo("w = %d h = %d",w,h)
-            map = np.zeros([h,w])
+            env_map = np.zeros([h,w])
             bm = binary_map().map.data
             map_origin = binary_map().map.info.origin.position
             map_resolution = binary_map().map.info.resolution
@@ -246,13 +246,13 @@ if __name__ == '__main__':
             for i in range (h):
                 if i%100==0:
                     rospy.loginfo("transcription binary_map : %d/%d",i,h)
-                map[i] = bm[i*h:i*h+w]
+                env_map[i] = bm[i*h:i*h+w]
             print("binary map ok")
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
 
 
-        env = Env(map)
+        env = Env(env_map)
         pos_pixel = transcription_repere_map(pos,map_origin,map_resolution)
         obj_pixel = transcription_repere_map(obj,map_origin,map_resolution)
         t = Tree(pos_pixel)
@@ -265,8 +265,8 @@ if __name__ == '__main__':
         path_tree = find_path(node_t,node_t2);
         rospy.loginfo("chemin trouve")
 
-        simplify_path(path_tree,env)
-        rospy.loginfo("chemin simplifie")
+        #simplify_path(path_tree,env)
+        #rospy.loginfo("chemin simplifie")
 
         checkpoints = ListePoints()
         node = path_tree
