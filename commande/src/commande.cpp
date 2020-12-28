@@ -16,7 +16,7 @@ float u_des_x;
 float u_des_w;
 bool end = false;
 
-void positionCallback(const nav_msgs::Odometry &msg)
+void positionCallback(const nav_msgs::Odometry &msg) //Callback de récuperation de l'odométrie
 {
   pos = msg.pose.pose;
 }
@@ -34,9 +34,8 @@ int main(int argc, char **argv)
   ros::Rate checkpoint_rate(1);
 
   int indice_point = 0;
-  while (!checkpoints_client.call(srv))
+  while (!checkpoints_client.call(srv)) //on attend que le rrt renvoie la liste des points de passage
   {
-    //ROS_INFO("failed to call service checkpoints");
     ros::spinOnce();
     checkpoint_rate.sleep();
   }
@@ -50,15 +49,15 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    if (sqrt(pow(point.x - pos.position.x, 2) + pow(point.y - pos.position.y, 2)) <= 0.1 )
+    if (sqrt(pow(point.x - pos.position.x, 2) + pow(point.y - pos.position.y, 2)) <= 0.1 ) //lorsque l'on est assez proche du point de passage actuel
     {
-      if (indice_point + 1 < checkpoints.points.size())
+      if (indice_point + 1 < checkpoints.points.size()) //s'il existe, on passe au point suivant
       {
         indice_point++;
         point = checkpoints.points[indice_point];
         ROS_INFO("checkpoint : [%f,%f]", point.x, point.y);
       }
-      else
+      else //sinon on signale la fin du parcours
       {
         end = true;
       }
@@ -72,22 +71,24 @@ int main(int argc, char **argv)
     ROS_INFO("y : %f", pos.position.y);
     ROS_INFO("theta : %f", theta);
 
+    //erreur de position entre le robot et le point de passage actuel
     float err_x = point.x - pos.position.x;
     float err_y = point.y - pos.position.y;
 
     float dist = sqrt(pow(err_x,2)+pow(err_y,2));
+    // vitesses carthésiennes désirées du robot
     float v_des_x = K * err_x;
     float v_des_y = K * err_y;
 
-    if(end)
+    if(end) //lorsque l'on est assez proche du dernier point, on met la commande à 0
     {
       u_des_x = 0;
       u_des_w = 0;
     }
     else
     {
-      u_des_x = cos(theta) * v_des_x/dist + sin(theta) * v_des_y/dist;
-      u_des_w = -sin(theta) / dist_p * v_des_x + cos(theta) / dist_p * v_des_y;
+      u_des_x = cos(theta) * v_des_x/dist + sin(theta) * v_des_y/dist; //on normalise le vecteur v_des pour avoir une vitesse constante
+      u_des_w = -sin(theta) / dist_p  * v_des_x + cos(theta) / dist_p  * v_des_y;
     }
 
     geometry_msgs::Twist cmd;
