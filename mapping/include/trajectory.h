@@ -20,7 +20,7 @@
 class Trajectory
 {
 private:
-    std::vector<cv::Point> list_;
+    std::vector<const cv::Point> list_;
     cv::Vec3b color_;
     unsigned int thickness_;
 
@@ -71,7 +71,7 @@ public:
      * 
      * @return The number of points in the trajectory.
      */
-    int size() const {return list_.size();}
+    int size() {return list_.size();}
 
     /**
      * Get the size of the vector of points.

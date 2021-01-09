@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     // Client du service /checkpoints
     ros::ServiceClient checkpoint_client = n.serviceClient<planification::Checkpoints>("checkpoints");
     planification::Checkpoints cp_srv;
-    Trajectory traj();
+    Trajectory traj;
     cv::Vec3b traj_col(0,0,200);
 
     ros::Rate loop_rate(30);
