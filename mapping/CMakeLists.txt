@@ -139,7 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(mapper src/mapper_client.cpp src/gridmap2d.cpp)
-add_executable(visu src/visualisator.cpp src/gridmap2d.cpp)
+add_executable(visu src/visualisator.cpp src/gridmap2d.cpp src/trajectory.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
