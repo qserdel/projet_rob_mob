@@ -54,7 +54,7 @@ class Env:
         dist = Env.dist(state,cible)
         if dist == 0 :
             dist = 1
-        norm = min(20,dist)
+        norm = min(40,dist)
         return [norm/dist*(cible[0]-state[0]),norm/dist*(cible[1]-state[1])]
 
 
@@ -63,30 +63,37 @@ class Env:
         Renvoie le point d'arrivee lorsque l'on applique action depuis state
         """
         candidate = [state[0] + action[0], state[1] + action[1]]
-        s1 = discretisation_segment(state[0],state[1],candidate[0],candidate[1])
-        pt = self.intersect_discret(s1)
+        pt = self.intersect_discret(state[0],state[1],candidate[0],candidate[1])
         if pt:
             candidate = pt
-            #return False
-        #else:
-            #newstate = [state[0] + (candidate[0] - state[0]), state[1] + (candidate[1] - state[1])]
         newstate = candidate
         if Env.dist(state, newstate) < 0.5 : #or Env.dist(state,newstate) > 100:  # Reject steps that are too small or too big
            return False
         else:
             return newstate
 
+    def intersect_discret(self,x1,y1,x2,y2):
+        """
+        Discretise un segment et retourne son intersection avec l'environnement si elle existe, false sinon
+        """
+        norm = math.sqrt((y2-y1)**2 + (x2-x1)**2)
+        if(norm == 0):
+            norm =1;
+        dx = (x2-x1)/norm
+        dy = (y2-y1)/norm
+        i = 0
+        xi = math.floor(x1)
+        yi = math.floor(y1)
+        if not self.mat[int(xi)][int(yi)] == 0 :
+            return [xi,yi]
 
-    def intersect_discret(self,s1):
-      """
-      Retourne l'intersection du segments discretises avec l'environement si elle existe, False sinon
-      """
-      for i in range(len(s1)):
-        #print("pixel segment : [%f,%f]",s1[i][0],s1[i][1])
-        #print("valeur : %d",self.mat[int(s1[i][0])][int(s1[i][1])])
-        if not self.mat[int(s1[i][0])][int(s1[i][1])] == 0 :
-          return s1[i]
-      return False
+        while not (xi == math.floor(x2)) and (not (yi == math.floor(y2))):
+            i+=1
+            xi = math.floor(x1+i*dx)
+            yi = math.floor(y1+i*dy)
+            if not self.mat[int(xi)][int(yi)] == 0 :
+                return [xi,yi]
+        return False
 
 
 class Tree:
@@ -98,30 +105,6 @@ class Tree:
         self.state = init_state
         self.successors = []
         self.all_nodes = [self]
-
-
-def discretisation_segment(x1,y1,x2,y2):
-    """
-    Discretise un segment et retourne la liste des pixels du segment
-    """
-    norm = math.sqrt((y2-y1)**2 + (x2-x1)**2)
-    if(norm == 0):
-        norm =1;
-    dx = (x2-x1)/norm
-    dy = (y2-y1)/norm
-    i = 0
-    xi = math.floor(x1)
-    yi = math.floor(y1)
-    pixels_segment = [[xi,yi]]
-
-    while not (xi == math.floor(x2)) and (not (yi == math.floor(y2))):
-        i+=1
-        xi = math.floor(x1+i*dx)
-        yi = math.floor(y1+i*dy)
-        if(not pixels_segment[len(pixels_segment)-1]==[xi,yi]):
-            pixels_segment.append([xi,yi])
-
-    return pixels_segment
 
 
 def rrt_expansion(t, env, action_type, cible):
@@ -153,6 +136,11 @@ def rrt_expansion(t, env, action_type, cible):
         new_node = Tree(new_state, nearest_neighbor)
         nearest_neighbor.successors.append(new_node)
         t.all_nodes.append(new_node)
+        # envoie du segment cree a l'affichage
+        segment = ListePoints()
+        segment.points.append(Point(nearest_neighbor.state[0],nearest_neighbor.state[1],0))
+        segment.points.append(Point(new_state[0],new_state[1],0))
+        segmentPub.publish(segment)
 
 
 def rrt_connect(t,t2,env):
@@ -181,9 +169,6 @@ def rrt_connect(t,t2,env):
             node_t = t.all_nodes[len(t.all_nodes)-2]
             node_t2 = t2.all_nodes[len(t2.all_nodes)-1]
         i+=1
-#  if(i==1000):
-#    node_t = t.all_nodes[len(t.all_nodes)-1]
-#    node_t2 = t2.all_nodes[len(t2.all_nodes)-2]
     return node_t, node_t2
 
 
@@ -225,9 +210,7 @@ def simplify_path(path_tree, env):
         node2 = node.successors[0]
         while len(node2.successors) > 0 :
             node2 = node2.successors[0]
-            s1 = discretisation_segment(node.state[0],node.state[1],node2.state[0],node2.state[1])
-
-            if not env.intersect_discret(s1):
+            if not env.intersect_discret(node.state[0],node.state[1],node2.state[0],node2.state[1]):
                 node.successors[0] = node2
         node = node.successors[0]
         path_tree.all_nodes.append(node)
@@ -257,7 +240,7 @@ def transcription_map_repere(pixel,map_origin,resolution):
     point = Point()
     point.x = x
     point.y = y
-    rospy.loginfo("pixel : [%d,%d] -> [%f,%f]",pixel[0],pixel[1],point.x,point.y)
+    #rospy.loginfo("pixel : [%d,%d] -> [%f,%f]",pixel[0],pixel[1],point.x,point.y)
     return point
 
 def transcription_repere_map(point,map_origin,resolution):
@@ -276,9 +259,10 @@ if __name__ == '__main__':
     global pos
     rospy.Subscriber("odom",Odometry,positionCallback)
     rospy.Subscriber("objective",Point,objectiveCallback)
+    # objectif du rrt
     obj = Point()
-    obj.x = -6.5
-    obj.y = -2
+    obj.x = -10
+    obj.y = -4
 
 
     while not rospy.is_shutdown():
@@ -313,6 +297,8 @@ if __name__ == '__main__':
         t2 = Tree(obj_pixel)
 
         print("execution du rrt connect ...")
+        # creation du publisher pour l'affichage des segments
+        segmentPub = rospy.Publisher('segments_rrt',ListePoints,queue_size=10)
         node_t, node_t2 = rrt_connect(t,t2,env)
         rospy.loginfo("rrt connect termine !")
 
