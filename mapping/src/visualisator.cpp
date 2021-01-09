@@ -16,6 +16,7 @@
 #include <mapping/BinaryMap.h>
 #include <planification/Checkpoints.h>
 #include <planification/ListePoints.h>
+#include "trajectory.h"
 
 using namespace gridmap_2d;
 
@@ -34,52 +35,6 @@ struct Robot
     cv::Vec3b color;
 };
 static Robot robot;
-
-struct CheckpointsTraj
-{
-    std::vector<cv::Point> points;
-    unsigned int len;
-    cv::Vec3b color;
-    unsigned int thickness;
-};
-CheckpointsTraj traj;
-
-void setCheckpointsTraj(CheckpointsTraj &cpt, const planification::Checkpoints &cp_list, cv::Vec3b col, unsigned int thickness)
-{
-    cpt.points.clear();
-    cpt.len = 0;
-    cpt.color = col;
-    cpt.thickness = thickness;
-    unsigned int mx, my;
-
-    for (const geometry_msgs::Point &pt : cp_list.response.points.points)
-    {
-        if (gridmap.inMapBounds(pt.x, pt.y))
-        {
-            gridmap.worldToMap(pt.x, pt.y, mx, my);
-            cpt.points.push_back(cv::Point(my, mx));
-            cpt.len++;
-        }
-    }
-}
-
-void showTraj(const CheckpointsTraj &cpt, cv::Mat& dest)
-{
-    for (int i=1 ; i<cpt.len ; i++)
-    {
-        cv::line(dest, cpt.points[i-1], cpt.points[i], cpt.color, cpt.thickness);
-    }
-}
-
-void printCheckPointsTraj(const CheckpointsTraj &cpt)
-{
-    std::cout << "Trajectoire de checkpoints:\n";
-    for (const cv::Point &pt : cpt.points)
-    {
-        std::cout << pt << ",";
-    }
-    std::cout << "\n";
-}
 
 void odomCallback(const nav_msgs::Odometry &msg)
 {
@@ -117,6 +72,7 @@ int main(int argc, char **argv)
     // Client du service /checkpoints
     ros::ServiceClient checkpoint_client = n.serviceClient<planification::Checkpoints>("checkpoints");
     planification::Checkpoints cp_srv;
+    Trajectory traj();
     cv::Vec3b traj_col(0,0,200);
 
     ros::Rate loop_rate(30);
@@ -156,15 +112,15 @@ int main(int argc, char **argv)
             // Récupération de la liste de checkpoint
             if (ros::Time::now()-time > delay_traj && checkpoint_client.call(cp_srv))
             {
-                setCheckpointsTraj(traj, cp_srv, traj_col, 1);
-                printCheckPointsTraj(traj);
+                traj.setTrajectory(cp_srv, gridmap);
+                traj.print();
                 time = ros::Time::now();
             }
 
             // Affichage de la liste de checkpoints
-            if (traj.len > 0)
+            if (traj.size() > 0)
             {
-                showTraj(traj, display_map);
+                traj.displayTraj(display_map);
             }
 
             cv::imshow(OPENCV_WINDOW, display_map);

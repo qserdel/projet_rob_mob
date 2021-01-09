@@ -1,7 +1,9 @@
 #include "trajectory.h"
 
-Trajectory::Trajectory(cv::Vec3b col, unsigned int thickness) : color_(col),
-                                                                thickness_(thickness) {}
+Trajectory::Trajectory(cv::Vec3b col, unsigned int thickness) : 
+list_(),
+color_(col),
+thickness_(thickness) {}
 
 Trajectory::~Trajectory()
 {

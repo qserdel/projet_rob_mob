@@ -28,7 +28,7 @@ public:
     /**
      * Construct a new dummy Trajectory.
      */
-    Trajectory() = default;
+    //Trajectory() = default;
 
     /**
      * Construct a new Trajectory.
