@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- Environnement -->
+	<!--<include file="$(find minilab_simulation)/launch/minilab_simulation.launch" /> -->
+	<!-- gmapping -->
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping"> 
+        <param name="delta" value="0.025" />
+        <param name="xmin" value="-20" />
+        <param name="xmax" value="5" />
+        <param name="ymin" value="-15" />
+        <param name="ymax" value="10" />
+    </node>
+    <!-- Explorer -->
+    <node pkg="autonomous" type="explorer" name="explorer" output="screen">
+        <param name="speed" value="0.6" />
+        <param name="distance" value="0.8" />
+    </node>
+</launch>
