@@ -28,7 +28,7 @@ public:
     /**
      * Construct a new dummy Trajectory.
      */
-    Trajectory() = default;
+    //Trajectory() = default;
 
     /**
      * Construct a new Trajectory.
@@ -71,14 +71,7 @@ public:
      * 
      * @return The number of points in the trajectory.
      */
-    int size() const {return list_.size();}
-
-    /**
-     * Get the size of the vector of points.
-     * 
-     * @return The number of points in the trajectory.
-     */
-    const int& size() const {return list_.size();}
+    int size() {return list_.size();}
 };
 
 #endif

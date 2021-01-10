@@ -16,6 +16,7 @@
 #include <mapping/BinaryMap.h>
 #include <planification/Checkpoints.h>
 #include <planification/ListePoints.h>
+#include "trajectory.h"
 
 using namespace gridmap_2d;
 
@@ -35,52 +36,6 @@ struct Robot
 };
 static Robot robot;
 
-struct CheckpointsTraj
-{
-    std::vector<cv::Point> points;
-    unsigned int len;
-    cv::Vec3b color;
-    unsigned int thickness;
-};
-CheckpointsTraj traj;
-
-void setCheckpointsTraj(CheckpointsTraj &cpt, const planification::Checkpoints &cp_list, cv::Vec3b col, unsigned int thickness)
-{
-    cpt.points.clear();
-    cpt.len = 0;
-    cpt.color = col;
-    cpt.thickness = thickness;
-    unsigned int mx, my;
-
-    for (const geometry_msgs::Point &pt : cp_list.response.points.points)
-    {
-        if (gridmap.inMapBounds(pt.x, pt.y))
-        {
-            gridmap.worldToMap(pt.x, pt.y, mx, my);
-            cpt.points.push_back(cv::Point(my, mx));
-            cpt.len++;
-        }
-    }
-}
-
-void showTraj(const CheckpointsTraj &cpt, cv::Mat& dest)
-{
-    for (int i=1 ; i<cpt.len ; i++)
-    {
-        cv::line(dest, cpt.points[i-1], cpt.points[i], cpt.color, cpt.thickness);
-    }
-}
-
-void printCheckPointsTraj(const CheckpointsTraj &cpt)
-{
-    std::cout << "Trajectoire de checkpoints:\n";
-    for (const cv::Point &pt : cpt.points)
-    {
-        std::cout << pt << ",";
-    }
-    std::cout << "\n";
-}
-
 void odomCallback(const nav_msgs::Odometry &msg)
 {
     geometry_msgs::Pose robot_pos = msg.pose.pose;
@@ -90,6 +45,47 @@ void odomCallback(const nav_msgs::Odometry &msg)
         gridmap.worldToMap(robot_pos.position.x, robot_pos.position.y, mx, my);
         robot.pos.x = my;
         robot.pos.y = mx;
+    }
+}
+
+struct Tree
+{
+    std::vector<cv::Point> nodes;
+    cv::Vec3b color;
+    unsigned int thickness;
+};
+static Tree tree;
+
+void buildTree(Tree &tree, cv::Vec3b col, unsigned int thickness)
+{
+    tree.color = col;
+    tree.thickness = thickness;
+}
+
+void displayTree(cv::Mat &dest, Tree &tree)
+{
+    for (size_t i = 1; i < tree.nodes.size(); i += 2)
+    {
+        cv::line(dest, tree.nodes.at(i - 1), tree.nodes.at(i), tree.color, tree.thickness);
+    }
+}
+
+void treeCallback(const planification::ListePoints &msg)
+{
+    unsigned int mx, my;
+    for (const geometry_msgs::Point &pt : msg.points)
+    {
+        tree.nodes.push_back(cv::Point(pt.x, pt.y));
+        if (gridmap.inMapBounds(pt.x, pt.y))
+        {
+            gridmap.worldToMap(pt.x, pt.y, mx, my);
+            tree.nodes.push_back(cv::Point(my, mx));
+
+        }
+        else
+        {
+            std::cout << "***WARNING:\n" << pt << " not in bound!\n";
+        }
     }
 }
 
@@ -109,7 +105,7 @@ int main(int argc, char **argv)
     mapping::BinaryMap map_srv;
 
     // Subscriber du topic /odom
-    ros::Subscriber odom_sub = n.subscribe("odom", 1000, odomCallback);
+    ros::Subscriber odom_sub = n.subscribe("odom", 5, odomCallback);
     robot.pos = cv::Point();
     robot.radius = 10;
     robot.color = cv::Vec3b(200, 0, 0);
@@ -117,7 +113,10 @@ int main(int argc, char **argv)
     // Client du service /checkpoints
     ros::ServiceClient checkpoint_client = n.serviceClient<planification::Checkpoints>("checkpoints");
     planification::Checkpoints cp_srv;
-    cv::Vec3b traj_col(0,0,200);
+    Trajectory traj;
+
+    ros::Subscriber tree_sub = n.subscribe("segments_rrt", 2, treeCallback);
+    buildTree(tree, cv::Vec3b(100, 100, 100), 1);
 
     ros::Rate loop_rate(30);
     ros::Rate map_rate(1);
@@ -154,17 +153,23 @@ int main(int argc, char **argv)
             }
 
             // Récupération de la liste de checkpoint
-            if (ros::Time::now()-time > delay_traj && checkpoint_client.call(cp_srv))
+            if (ros::Time::now() - time > delay_traj && checkpoint_client.call(cp_srv))
             {
-                setCheckpointsTraj(traj, cp_srv, traj_col, 1);
-                printCheckPointsTraj(traj);
+                traj.setTrajectory(cp_srv, gridmap);
+                traj.print();
                 time = ros::Time::now();
             }
 
-            // Affichage de la liste de checkpoints
-            if (traj.len > 0)
+            // affichage du rrt
+            if (tree.nodes.size() > 0)
             {
-                showTraj(traj, display_map);
+                displayTree(display_map, tree);
+            }
+
+            // Affichage de la liste de checkpoints
+            if (traj.size() > 0)
+            {
+                traj.displayTraj(display_map);
             }
 
             cv::imshow(OPENCV_WINDOW, display_map);

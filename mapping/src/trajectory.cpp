@@ -1,24 +1,26 @@
 #include "trajectory.h"
 
-Trajectory::Trajectory(cv::Vec3b col, unsigned int thickness) : color_(col),
-                                                                thickness_(thickness) {}
+Trajectory::Trajectory(cv::Vec3b col, unsigned int thickness) : 
+list_(),
+color_(col),
+thickness_(thickness) {}
 
 Trajectory::~Trajectory()
 {
     list_.clear();
 }
 
-bool Trajectory::setTrajectory(const planification::Checlpoints &checkpoints, const gridmap_2d::GridMap2D &gridmap)
+bool Trajectory::setTrajectory(const planification::Checkpoints &checkpoints, const gridmap_2d::GridMap2D &gridmap)
 {
     list_.clear();
     unsigned int mx, my;
 
-    for (const geometry_msgs::Point &pt : cp_list.response.points.points)
+    for (const geometry_msgs::Point &pt : checkpoints.response.points.points)
     {
         if (gridmap.inMapBounds(pt.x, pt.y))
         {
             gridmap.worldToMap(pt.x, pt.y, mx, my);
-            cpt.points.push_back(cv::Point(my, mx));
+            list_.push_back(cv::Point(my, mx));
         }
         else
         {
@@ -35,9 +37,9 @@ bool Trajectory::displayTraj(cv::Mat &dest) const
     {
         return false;
     }
-    for (int i = 1; i < cpt.len; i++)
+    for (int i = 1; i < list_.size(); i++)
     {
-        cv::line(dest, cpt.points[i - 1], cpt.points[i], cpt.color, cpt.thickness);
+        cv::line(dest, list_[i - 1], list_[i], color_, thickness_);
     }
     return true;
 }
@@ -46,11 +48,11 @@ void Trajectory::print() const
 {
     std::cout << "Trajectoire de checkpoints:\n";
     if (list_.size() == 0){
-        std::cout << "empty\n";
+        std::cout << "empty...\n";
     }
     else
     {
-        for (const cv::Point &pt : cpt.points)
+        for (const cv::Point &pt : list_)
         {
             std::cout << pt << ",";
         }
