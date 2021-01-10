@@ -19,11 +19,38 @@ class Explorer
     //ros::ServiceClient map_client_;
 
 public:
+    /**
+     * @brief Construct a new Explorer object
+     * 
+     */
     Explorer();
 
-    void scanCallback(const sensor_msgs::LaserScan& msg);
-    void compute_pos(const sensor_msgs::LaserScan& msg, const size_t index, float& x, float& y);
-    size_t index_from_angle(float angle, const sensor_msgs::LaserScan& msg);
+    /**
+     * @brief Callback function on Lidar measure topic.
+     * 
+     * @param msg The Lidar measure topic.
+     */
+    void scanCallback(const sensor_msgs::LaserScan &msg);
+
+    /**
+     * @brief Get the coordinate of point measured at the index 
+     * in the Lidar measure topic.
+     * 
+     * @param msg The lidar measure topic.
+     * @param index The index of the point we want to know its coordinate.
+     * @param x The x coordinate of the point.
+     * @param y The y coordinate of the point.
+     */
+    void compute_pos(const sensor_msgs::LaserScan &msg, const size_t index, float &x, float &y);
+
+    /**
+     * @brief Get the correct index in the list of measure of the Lidar topic.
+     *  
+     * @param angle The angle we want to know the index of.
+     * @param msg The Lidar measure topic.
+     * @return size_t The index of the list corresponding to the desired angle.
+     */
+    size_t index_from_angle(float angle, const sensor_msgs::LaserScan &msg);
 };
 
-#endif  // __EXPLORER_H__
+#endif // __EXPLORER_H__
