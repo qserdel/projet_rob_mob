@@ -48,6 +48,47 @@ void odomCallback(const nav_msgs::Odometry &msg)
     }
 }
 
+struct Tree
+{
+    std::vector<cv::Point> nodes;
+    cv::Vec3b color;
+    unsigned int thickness;
+};
+static Tree tree;
+
+void buildTree(Tree &tree, cv::Vec3b col, unsigned int thickness)
+{
+    tree.color = col;
+    tree.thickness = thickness;
+}
+
+void displayTree(cv::Mat &dest, Tree &tree)
+{
+    for (size_t i = 1; i < tree.nodes.size(); i += 2)
+    {
+        cv::line(dest, tree.nodes.at(i - 1), tree.nodes.at(i), tree.color, tree.thickness);
+    }
+}
+
+void treeCallback(const planification::ListePoints &msg)
+{
+    unsigned int mx, my;
+    for (const geometry_msgs::Point &pt : msg.points)
+    {
+        tree.nodes.push_back(cv::Point(pt.x, pt.y));
+        if (gridmap.inMapBounds(pt.x, pt.y))
+        {
+            gridmap.worldToMap(pt.x, pt.y, mx, my);
+            tree.nodes.push_back(cv::Point(my, mx));
+
+        }
+        else
+        {
+            std::cout << "***WARNING:\n" << pt << " not in bound!\n";
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "visu");
@@ -64,7 +105,7 @@ int main(int argc, char **argv)
     mapping::BinaryMap map_srv;
 
     // Subscriber du topic /odom
-    ros::Subscriber odom_sub = n.subscribe("odom", 1000, odomCallback);
+    ros::Subscriber odom_sub = n.subscribe("odom", 5, odomCallback);
     robot.pos = cv::Point();
     robot.radius = 10;
     robot.color = cv::Vec3b(200, 0, 0);
@@ -73,6 +114,9 @@ int main(int argc, char **argv)
     ros::ServiceClient checkpoint_client = n.serviceClient<planification::Checkpoints>("checkpoints");
     planification::Checkpoints cp_srv;
     Trajectory traj;
+
+    ros::Subscriber tree_sub = n.subscribe("segments_rrt", 2, treeCallback);
+    buildTree(tree, cv::Vec3b(100, 100, 100), 1);
 
     ros::Rate loop_rate(30);
     ros::Rate map_rate(1);
@@ -109,11 +153,17 @@ int main(int argc, char **argv)
             }
 
             // Récupération de la liste de checkpoint
-            if (ros::Time::now()-time > delay_traj && checkpoint_client.call(cp_srv))
+            if (ros::Time::now() - time > delay_traj && checkpoint_client.call(cp_srv))
             {
                 traj.setTrajectory(cp_srv, gridmap);
                 traj.print();
                 time = ros::Time::now();
+            }
+
+            // affichage du rrt
+            if (tree.nodes.size() > 0)
+            {
+                displayTree(display_map, tree);
             }
 
             // Affichage de la liste de checkpoints

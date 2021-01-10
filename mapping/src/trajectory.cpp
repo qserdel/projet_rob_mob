@@ -33,7 +33,7 @@ bool Trajectory::setTrajectory(const planification::Checkpoints &checkpoints, co
 
 bool Trajectory::displayTraj(cv::Mat &dest) const
 {
-    if (dest.empty())
+    if (!dest.empty())
     {
         return false;
     }
