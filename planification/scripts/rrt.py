@@ -9,12 +9,15 @@ import time
 import rospy
 import numpy as np
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, PoseStamped
 from nav_msgs.msg import Odometry
 from mapping.srv import *
 from planification.msg import ListePoints
 from planification.srv import Checkpoints
 
+global pos
+global obj
+obj = Point()
 
 class Env:
     """
@@ -220,13 +223,14 @@ def positionCallback(msg):
     Callback du subscriber de l'odometrie
     """
     global pos
-    pos = msg.pose.pose.position
+    pos = Point(msg.pose.pose.position.y,msg.pose.pose.position.x,0)
 
 def objectiveCallback(objective):
     """
     Callback du subscriber de l'objectif
     """
-    obj = objective
+    obj = Point(objective.pose.position.y,objective.pose.position.x,0)
+    print(obj)
 
 def send_checkpoints(self):
     return checkpoints
@@ -235,11 +239,9 @@ def transcription_map_repere(pixel,map_origin,resolution):
     """
     Traduit une position de pixel en coordonnees repere
     """
-    y = pixel[0]*resolution+map_origin.x
-    x = pixel[1]*resolution+map_origin.y
-    point = Point()
-    point.x = x
-    point.y = y
+    x = (pixel[0]+0.5)*resolution+map_origin.x
+    y = (pixel[1]+0.5)*resolution+map_origin.y
+    point = Point(x,y,0)
     #rospy.loginfo("pixel : [%d,%d] -> [%f,%f]",pixel[0],pixel[1],point.x,point.y)
     return point
 
@@ -247,8 +249,8 @@ def transcription_repere_map(point,map_origin,resolution):
     """
     Traduit des coordonnees repere en position de pixel
     """
-    y = int((point.x-map_origin.x)/resolution)
-    x = int((point.y-map_origin.y)/resolution)
+    x = int((point.x-map_origin.x)/resolution)
+    y = int((point.y-map_origin.y)/resolution)
     pixel = [x,y]
     #rospy.loginfo("point : [%f,%f] -> [%d,%d]",point.x,point.y,pixel[0],pixel[1])
     return pixel
@@ -256,17 +258,17 @@ def transcription_repere_map(point,map_origin,resolution):
 # main
 if __name__ == '__main__':
     rospy.init_node('planification',anonymous=False)
-    global pos
+    #obj=None
     rospy.Subscriber("odom",Odometry,positionCallback)
-    rospy.Subscriber("objective",Point,objectiveCallback)
-    # objectif du rrt
-    obj = Point()
-    obj.x = -3.5
-    obj.y = -0
-
+    rospy.Subscriber("move_base_simple/goal",PoseStamped,objectiveCallback)
+    obj = Point(-3.5,0,0)
 
     while not rospy.is_shutdown():
         rospy.loginfo("on entre dans la boucle du rrt")
+        rospy.loginfo("en attente de l'objectif du rrt...")
+        while(obj==None):
+            rospy.spin()
+        rospy.loginfo("objectif recupere")
         # service de recuperation de la matrice map
         rospy.wait_for_service('binary_map')
         rospy.loginfo("binary map recuperee")
@@ -275,16 +277,16 @@ if __name__ == '__main__':
             w = binary_map().map.info.width
             h = binary_map().map.info.height
             rospy.loginfo("w = %d h = %d",w,h)
-            map = np.zeros([h,w])
+            map = np.zeros([w,h])
             bm = binary_map().map.data
             map_origin = binary_map().map.info.origin.position
             map_resolution = binary_map().map.info.resolution
             rospy.loginfo("origine : [%f,%f]",map_origin.x,map_origin.y)
             rospy.loginfo("resolution : %f",map_resolution)
-            for i in range (h):
+            for i in range (w):
                 if i%100==0:
-                    rospy.loginfo("transcription binary_map : %d/%d",i,h)
-                map[i] = bm[i*h:i*h+w]
+                    rospy.loginfo("transcription binary_map : %d/%d",i,w)
+                map[i] = bm[i*w:i*w+h]
             print("binary map ok")
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
@@ -292,13 +294,19 @@ if __name__ == '__main__':
         # creation de l'environnement
         env = Env(map)
         pos_pixel = transcription_repere_map(pos,map_origin,map_resolution)
+        print(pos_pixel)
         obj_pixel = transcription_repere_map(obj,map_origin,map_resolution)
+        print(obj_pixel)
         t = Tree(pos_pixel)
         t2 = Tree(obj_pixel)
 
         print("execution du rrt connect ...")
         # creation du publisher pour l'affichage des segments
-        segmentPub = rospy.Publisher('segments_rrt',ListePoints,queue_size=10)
+        segmentPub = rospy.Publisher('segments_rrt',ListePoints,queue_size=10,latch=True)
+        segment = ListePoints()
+        segment.points.append(Point(obj_pixel[0],obj_pixel[1],0))
+        segment.points.append(Point(pos_pixel[0],pos_pixel[1],0))
+        segmentPub.publish(segment)
         node_t, node_t2 = rrt_connect(t,t2,env)
         rospy.loginfo("rrt connect termine !")
 

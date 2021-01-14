@@ -75,8 +75,9 @@ void treeCallback(const planification::ListePoints &msg)
     unsigned int mx, my;
     for (const geometry_msgs::Point &pt : msg.points)
     {
+        std::cout<<pt.x<<","<<pt.y<<std::endl;
         tree.nodes.push_back(cv::Point(pt.x, pt.y));
-        if (gridmap.inMapBounds(pt.x, pt.y))
+        /*if (gridmap.inMapBounds(pt.x, pt.y))
         {
             gridmap.worldToMap(pt.x, pt.y, mx, my);
             tree.nodes.push_back(cv::Point(my, mx));
@@ -85,7 +86,7 @@ void treeCallback(const planification::ListePoints &msg)
         else
         {
             std::cout << "***WARNING:\n" << pt << " not in bound!\n";
-        }
+        }*/
     }
 }
 
@@ -122,7 +123,8 @@ int main(int argc, char **argv)
     ros::Rate map_rate(1);
 
     // OpenCV window
-    cv::namedWindow(OPENCV_WINDOW);
+    cv::namedWindow(OPENCV_WINDOW, CV_WINDOW_NORMAL);
+    cv::resizeWindow(OPENCV_WINDOW,500,500);
 
     // Wait to receive the map
     while (!map_client.call(map_srv))
@@ -163,7 +165,7 @@ int main(int argc, char **argv)
             // affichage du rrt
             if (tree.nodes.size() > 0)
             {
-                tree.displayTree(display_map, tree);
+                displayTree(display_map, tree);
             }
 
             // Affichage de la liste de checkpoints
