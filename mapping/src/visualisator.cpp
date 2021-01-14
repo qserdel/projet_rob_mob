@@ -135,8 +135,10 @@ int main(int argc, char **argv)
     //display_map = gridmap.binaryMap();
     cv::cvtColor(gridmap.binaryMap(), display_map, cv::COLOR_GRAY2RGB);
 
-    ros::Time time = ros::Time::now();
+    ros::Time traj_time = ros::Time::now();
     ros::Duration delay_traj(10.);
+    ros::Time binary_map_time = ros::Time::now();
+    ros::Duration delay_binary_map(3.);
 
     // continuous display
     while (ros::ok())
@@ -153,7 +155,7 @@ int main(int argc, char **argv)
             }
 
             // Récupération de la liste de checkpoint
-            if (ros::Time::now() - time > delay_traj && checkpoint_client.call(cp_srv))
+            if (ros::Time::now() - traj_time > delay_traj && checkpoint_client.call(cp_srv))
             {
                 traj.setTrajectory(cp_srv, gridmap);
                 traj.print();
