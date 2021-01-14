@@ -261,8 +261,8 @@ if __name__ == '__main__':
     rospy.Subscriber("objective",Point,objectiveCallback)
     # objectif du rrt
     obj = Point()
-    obj.x = -10
-    obj.y = -4
+    obj.x = -3.5
+    obj.y = -0
 
 
     while not rospy.is_shutdown():
