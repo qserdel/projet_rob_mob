@@ -13,6 +13,6 @@
     <!-- Explorer -->
     <node pkg="autonomous" type="explorer" name="explorer" output="screen">
         <param name="speed" value="0.6" />
-        <param name="distance" value="0.8" />
+        <param name="distance" value="1.0" />
     </node>
 </launch>

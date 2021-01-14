@@ -8,7 +8,7 @@
 	<node name="mapper" pkg="mapping" type="mapper" />
 	<node name="visu" pkg="mapping" type="visu" />
 	<!-- Planification -->
-	<node name="rrt" pkg="planification" type="rrt.py" />
+	<node name="rrt" pkg="planification" type="rrt.py" output="screen" />
 	<!-- Commande -->
 	<node name="commande" pkg="commande" type="commande" />
 	<!-- Visualisation -->

@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     planification::Checkpoints cp_srv;
     Trajectory traj;
 
-    ros::Subscriber tree_sub = n.subscribe("segments_rrt", 2, treeCallback);
+    ros::Subscriber tree_sub = n.subscribe("segments_rrt", 10, treeCallback);
     buildTree(tree, cv::Vec3b(100, 100, 100), 1);
 
     ros::Rate loop_rate(30);
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
             // affichage du rrt
             if (tree.nodes.size() > 0)
             {
-                displayTree(display_map, tree);
+                tree.displayTree(display_map, tree);
             }
 
             // Affichage de la liste de checkpoints

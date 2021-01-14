@@ -34,6 +34,7 @@ void Explorer::scanCallback(const sensor_msgs::LaserScan &msg)
             i_min = i;
     }
 
+    // Indexes for wall detection
     size_t index_i, index_j;
     index_i = 0;
     index_j = index_from_angle(-M_PI / 4, msg);
@@ -51,10 +52,11 @@ void Explorer::scanCallback(const sensor_msgs::LaserScan &msg)
 
     // Angular
     float dist = msg.ranges.at(i_min);
-    std::cout << "dist: " << dist << std::endl;
     float tan((yi - yj) / (xi - xj));
+    std::cout << "tan: " << tan << std::endl;
+    std::cout << "xi: " << xi << "\txj: " << xj << std::endl;
+    std::cout << "yi: " << yi << "\tyj: " << yj << std::endl;
     float angle(std::atan2(yi - yj, xi - xj));
-    std::cout << "angle: " << angle << std::endl;
     cmd.angular.z = k1_ * (dist - d0_) / (speed_ * std::cos(angle)) - k2_ * -tan;
     cmd_pub_.publish(cmd);
 }
@@ -62,7 +64,7 @@ void Explorer::scanCallback(const sensor_msgs::LaserScan &msg)
 void Explorer::compute_pos(const sensor_msgs::LaserScan &msg, const size_t index, float &x, float &y)
 {
     float angle(msg.angle_min + msg.angle_increment * index);
-    float dist(msg.ranges.at(index));
+    float dist(msg.ranges.at(index) < msg.range_max ? msg.ranges.at(index) : msg.range_max);
     x = dist * std::cos(angle);
     y = dist * std::sin(angle);
 }

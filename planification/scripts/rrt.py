@@ -78,7 +78,7 @@ class Env:
         """
         norm = math.sqrt((y2-y1)**2 + (x2-x1)**2)
         if(norm == 0):
-            norm =1;
+            norm =1
         dx = (x2-x1)/norm
         dy = (y2-y1)/norm
         i = 0
@@ -302,7 +302,7 @@ if __name__ == '__main__':
         node_t, node_t2 = rrt_connect(t,t2,env)
         rospy.loginfo("rrt connect termine !")
 
-        path_tree = find_path(node_t,node_t2);
+        path_tree = find_path(node_t,node_t2)
         rospy.loginfo("chemin trouve !")
 
         simplify_path(path_tree,env)
