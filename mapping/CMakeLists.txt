@@ -7,17 +7,17 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED#COMPONENTS
-	roscpp
-	geometry_msgs
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
   nav_msgs
-	std_msgs
-	rosconsole
+  sensor_msgs
+  geometry_msgs
+  std_msgs
   message_generation
 )
 
 ## System dependencies are found with CMake's conventions
-#find_package(Boost REQUIRED COMPONENTS system)
+# find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(OpenCV REQUIRED)
 
@@ -51,17 +51,17 @@ find_package(OpenCV REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- #add_message_files(
- #  FILES
- #  ListePoints.msg
- #)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   BinaryMap.srv
- #  Checkpoints.srv
- )
+add_service_files(
+  FILES
+  BinaryMap.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -71,12 +71,10 @@ find_package(OpenCV REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   nav_msgs
-   std_msgs  # Or other packages containing msgs
-   geometry_msgs
- )
+generate_messages(
+  DEPENDENCIES
+  nav_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,9 +107,8 @@ find_package(OpenCV REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES mapping
-  CATKIN_DEPENDS roscpp rosconsole nav_msgs message_runtime geometry_msgs
-  #DEPENDS system_lib OpenCV
+  # LIBRARIES mapping
+  CATKIN_DEPENDS roscpp message_runtime nav_msgs
   DEPENDS OpenCV
 )
 
@@ -122,7 +119,9 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -138,8 +137,10 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(mapper src/mapper_client.cpp src/gridmap2d.cpp)
-add_executable(visu src/visualisator.cpp src/gridmap2d.cpp src/trajectory.cpp)
+# add_executable(${PROJECT_NAME}_node src/mapping_node.cpp)
+add_executable(auto_explo src/explo_main.cpp src/explorer.cpp)
+add_executable(supervisor src/supervisor_main.cpp src/mapper.cpp src/supervisor.cpp src/gridmap2d.cpp)
+add_executable(map_loader src/loader_main.cpp src/mapper.cpp src/loader.cpp src/gridmap2d.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -149,15 +150,24 @@ add_executable(visu src/visualisator.cpp src/gridmap2d.cpp src/trajectory.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(mapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
-add_dependencies(visu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(auto_explo ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(supervisor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(map_loader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(mapper
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
+target_link_libraries(auto_explo
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
-target_link_libraries(visu
+target_link_libraries(supervisor
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+target_link_libraries(map_loader
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )

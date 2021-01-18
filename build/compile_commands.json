@@ -1,0 +1,97 @@
+[
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock_main.dir/__/googletest/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock_main.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+  "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /usr/src/googletest/googlemock/src/gmock_main.cc",
+  "file": "/usr/src/googletest/googlemock/src/gmock_main.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock.dir/__/googletest/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+  "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock/gtest",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_main_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /usr/src/googletest/googletest/src/gtest_main.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest_main.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/gtest/googlemock/gtest",
+  "command": "/usr/bin/g++-7  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -g -fPIC    -Wall -Wshadow -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/auto_explo.dir/src/explo_main.cpp.o -c /home/florentin/rob_mob/src/mapping/src/explo_main.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/explo_main.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/auto_explo.dir/src/mapper.cpp.o -c /home/florentin/rob_mob/src/mapping/src/mapper.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/mapper.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/auto_explo.dir/src/explorer.cpp.o -c /home/florentin/rob_mob/src/mapping/src/explorer.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/explorer.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/auto_explo.dir/src/gridmap2d.cpp.o -c /home/florentin/rob_mob/src/mapping/src/gridmap2d.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/gridmap2d.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/map_loader.dir/src/loader_main.cpp.o -c /home/florentin/rob_mob/src/mapping/src/loader_main.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/loader_main.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/map_loader.dir/src/mapper.cpp.o -c /home/florentin/rob_mob/src/mapping/src/mapper.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/mapper.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/map_loader.dir/src/loader.cpp.o -c /home/florentin/rob_mob/src/mapping/src/loader.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/loader.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/mapping",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"mapping\\\" -I/home/florentin/rob_mob/src/build/devel/include -I/home/florentin/rob_mob/src/mapping/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/map_loader.dir/src/gridmap2d.cpp.o -c /home/florentin/rob_mob/src/mapping/src/gridmap2d.cpp",
+  "file": "/home/florentin/rob_mob/src/mapping/src/gridmap2d.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/visualisator",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"visualisator\\\" -I/home/florentin/rob_mob/src/visualisator/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/visu.dir/src/visu_main.cpp.o -c /home/florentin/rob_mob/src/visualisator/src/visu_main.cpp",
+  "file": "/home/florentin/rob_mob/src/visualisator/src/visu_main.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/visualisator",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"visualisator\\\" -I/home/florentin/rob_mob/src/visualisator/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/visu.dir/src/displayer.cpp.o -c /home/florentin/rob_mob/src/visualisator/src/displayer.cpp",
+  "file": "/home/florentin/rob_mob/src/visualisator/src/displayer.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/visualisator",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"visualisator\\\" -I/home/florentin/rob_mob/src/visualisator/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/visu.dir/src/gridmap2d.cpp.o -c /home/florentin/rob_mob/src/visualisator/src/gridmap2d.cpp",
+  "file": "/home/florentin/rob_mob/src/visualisator/src/gridmap2d.cpp"
+},
+{
+  "directory": "/home/florentin/rob_mob/src/build/visualisator",
+  "command": "/usr/bin/g++-7  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"visualisator\\\" -I/home/florentin/rob_mob/src/visualisator/include -I/opt/ros/melodic/include -I/opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=c++11 -o CMakeFiles/visu.dir/src/trajectory.cpp.o -c /home/florentin/rob_mob/src/visualisator/src/trajectory.cpp",
+  "file": "/home/florentin/rob_mob/src/visualisator/src/trajectory.cpp"
+}
+]
