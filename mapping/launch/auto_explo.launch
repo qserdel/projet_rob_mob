@@ -11,7 +11,7 @@
         <param name="ymax" value="10" />
     </node>
     <!-- Explorer -->
-    <node pkg="mapping" type="auto_explo" name="explorer" output="screen">
+    <node pkg="mapping" type="auto_explo" name="explorer">
         <param name="speed" value="0.6" />
         <param name="distance" value="1.0" />
         <param name="k1" value="1.2" />
@@ -20,4 +20,5 @@
     <!-- Supervisor -->
     <node pkg="mapping" type="supervisor" name="supervisor" output="screen">
     </node>
+    <!-- <node pkg="visualisator" type="visu" name="visu" output="screen"> </node> -->
 </launch>

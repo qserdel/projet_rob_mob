@@ -116,6 +116,12 @@ void Displayer::display()
     {
         display_map_ = cv::Mat::zeros(display_map_.rows, display_map_.cols, CV_8U);
         cv::cvtColor(gridmap_.binaryMap(), display_map_, cv::COLOR_GRAY2RGB);
+        
+        // Affichage du robot dans la map
+        if (robot_.pos.x != 0 && robot_.pos.y != 0)
+        {
+            cv::circle(display_map_, robot_.pos, robot_.radius, robot_.color, CV_FILLED);
+        }
 
         cv::imshow(WINDOW_NAME, display_map_);
         cvWaitKey(1);
