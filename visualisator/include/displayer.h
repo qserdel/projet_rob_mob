@@ -47,6 +47,7 @@ private:
     Robot robot_;
     Tree tree_;
     bool mapping_done_;
+    bool final_map_get_;
 
     ros::Rate rate_;
     ros::Time traj_time_;

@@ -13,8 +13,7 @@ int main(int argc, char **argv)
         // {
         //     ros::spinOnce();
         // }
-        // if (!d.mappingDone())
-        d.display();
+        if (d.mappingDone()) { d.display(); }
         ros::spinOnce();
     }
     return 0;

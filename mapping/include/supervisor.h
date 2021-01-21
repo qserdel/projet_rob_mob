@@ -27,7 +27,7 @@ public:
     cv::Point robotPos();
     void odomCallback(const nav_msgs::Odometry &msg);
     virtual void spin();
-    // void show();
+    void show();
 };
 
 

@@ -12,6 +12,7 @@ Displayer::Displayer() : map_client_(),
                          map_srv_(),
                          traj_(),
                          mapping_done_(false),
+                         final_map_get_(false),
                          rate_(1.0f)
 {
     ros::NodeHandle n("~");
@@ -85,38 +86,51 @@ void Displayer::odomCallback(const nav_msgs::Odometry &msg)
 void Displayer::mapDoneCallback(const std_msgs::Bool &msg)
 {
     mapping_done_ = msg.data;
+    if (mapping_done_ && !final_map_get_)
+    {
+        while (!map_client_.call(map_srv_))
+            ;
+        gridmap_.setMap(map_srv_.response.map);
+        final_map_get_ = true;
+    }
 }
 
 bool Displayer::mappingDone()
 {
-    // if (!mapping_done_ && map_client_.call(map_srv_))
-    // {
-    //     gridmap_.setMap(map_srv_.response.map);
-    //     cv::cvtColor(gridmap_.binaryMap(), display_map_, cv::COLOR_GRAY2RGB);
+    if (!mapping_done_ && map_client_.call(map_srv_))
+    {
+        gridmap_.setMap(map_srv_.response.map);
+        cv::cvtColor(gridmap_.binaryMap(), display_map_, cv::COLOR_GRAY2RGB);
 
-    //     if (!display_map_.empty())
-    //     {
-    //         cv::imshow(WINDOW_NAME, display_map_);
-    //     }
-    //     cvWaitKey(1);
-    // }
-    // rate_.sleep();
+        // Affichage du robot dans la map
+        if (robot_.pos.x != 0 && robot_.pos.y != 0)
+        {
+            cv::circle(display_map_, robot_.pos, robot_.radius, robot_.color, CV_FILLED);
+        }
+
+        // if (!display_map_.empty())
+        // {
+        cv::imshow(WINDOW_NAME, display_map_);
+        // }
+        cvWaitKey(1);
+    }
+    rate_.sleep();
     return mapping_done_;
 }
 
 void Displayer::display()
 {
-    if (map_client_.call(map_srv_))
-    {
-        gridmap_.setMap(map_srv_.response.map);
-        cv::cvtColor(gridmap_.binaryMap(), display_map_, cv::COLOR_GRAY2RGB);
-    }
+    // if (map_client_.call(map_srv_))
+    // {
+    //     gridmap_.setMap(map_srv_.response.map);
+    //     cv::cvtColor(gridmap_.binaryMap(), display_map_, cv::COLOR_GRAY2RGB);
+    // }
 
-    if (!display_map_.empty())
+    if (!gridmap_.binaryMap().empty())
     {
         display_map_ = cv::Mat::zeros(display_map_.rows, display_map_.cols, CV_8U);
         cv::cvtColor(gridmap_.binaryMap(), display_map_, cv::COLOR_GRAY2RGB);
-        
+
         // Affichage du robot dans la map
         if (robot_.pos.x != 0 && robot_.pos.y != 0)
         {

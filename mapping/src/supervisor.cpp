@@ -37,8 +37,6 @@ void Supervisor::init()
     while (!tf_->canTransform(robot_frame_, map_frame_, ros::Time(0.0), ros::Duration(1.0)))
         ;
     robot_pos_init_ = robotPos();
-    std::cout << "\n------------------\n BBBBBBBBBBB\n"
-                  << robot_pos_init_ << std::endl; 
 }
 
 cv::Point Supervisor::robotPos()
@@ -68,27 +66,22 @@ void Supervisor::spin()
         cv::circle(check_, robot_pos_init_, 70, cv::Vec3b(0, 0, 0), CV_FILLED);
         
         // end condition
-        // TODO
         cv::floodFill(check_, robotPos(), cv::Scalar(155));
         if ((int)check_.at<uchar>(0, 0) != 155 && (int)check_.at<uchar>(robot_pos_init_.y, robot_pos_init_.x) == 0)
         {
             done_ = true;
+            cv::floodFill(gridmap_.binaryMap(), cv::Point(0,0), cv::Scalar(0));
             std::cout << "finished!!\n";
         }
-        std::cout << "\n------------------\n"
-                  << (int)check_.at<uchar>(0, 0) << "\n"
-                  << (int)check_.at<uchar>(check_.rows - 1, check_.cols - 1) << "\n"
-                  << robot_pos_init_ << "\n"
-                  << (int)check_.at<uchar>(robot_pos_init_.y, robot_pos_init_.x) << std::endl;
     }
     done.data = done_;
     done_pub_.publish(done);
     rate_.sleep();
 }
 
-// void Supervisor::show()
-// {
-//     if (!check_.empty())
-//         cv::imshow("check", check_);
-//     cvWaitKey(1);
-// }
+void Supervisor::show()
+{
+    // if (!check_.empty())
+    //     cv::imshow("check", check_);
+    // cvWaitKey(1);
+}
