@@ -20,5 +20,5 @@
     <!-- Supervisor -->
     <node pkg="mapping" type="supervisor" name="supervisor" output="screen">
     </node>
-    <!-- <node pkg="visualisator" type="visu" name="visu" output="screen"> </node> -->
+    <node pkg="visualisator" type="visu" name="visu" output="screen"> </node>
 </launch>

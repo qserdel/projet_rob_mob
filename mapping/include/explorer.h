@@ -4,6 +4,7 @@
 #include "mapper.h"
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/Twist.h"
+#include "std_msgs/Bool.h"
 
 class Explorer
 {
@@ -14,6 +15,10 @@ class Explorer
 
     ros::Subscriber scan_sub_;
     ros::Publisher cmd_pub_;
+    ros::Subscriber done_sub_;
+
+    bool done_;
+    bool stoped_;
 
 public:
     /**
@@ -34,6 +39,13 @@ public:
      * @param msg The Lidar measure topic.
      */
     void scanCallback(const sensor_msgs::LaserScan &msg);
+
+    /**
+     * @brief Callback function on mapping done topic
+     * 
+     * @param msg The boolean message indicating the end of the mapping
+     */
+    void doneCallback(const std_msgs::Bool& msg);
 
     /**
      * @brief Get the coordinate of point measured at the index 

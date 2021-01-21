@@ -18,7 +18,7 @@ Supervisor::Supervisor(tf2_ros::Buffer *buffer) : Mapper(),
 
     robot_frame_ = n.param<std::string>("robot_frame", "base_footprint");
 
-    cv::namedWindow("check");
+    // cv::namedWindow("check");
 }
 
 Supervisor::~Supervisor()
@@ -86,9 +86,9 @@ void Supervisor::spin()
     rate_.sleep();
 }
 
-void Supervisor::show()
-{
-    if (!check_.empty())
-        cv::imshow("check", check_);
-    cvWaitKey(1);
-}
+// void Supervisor::show()
+// {
+//     if (!check_.empty())
+//         cv::imshow("check", check_);
+//     cvWaitKey(1);
+// }

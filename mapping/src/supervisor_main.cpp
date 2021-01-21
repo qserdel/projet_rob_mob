@@ -26,7 +26,7 @@ int main(int argc, char **argv)
             time = ros::Time::now();
         }
 
-        supervisor->show();
+        // supervisor->show();
         ros::spinOnce();
     }
     return 0;
