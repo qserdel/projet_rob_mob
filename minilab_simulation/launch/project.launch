@@ -12,7 +12,7 @@
 	<!-- Commande -->
 	<node name="commande" pkg="commande" type="commande" />
 	<!-- Visualisation -->
-	<node name="rviz" pkg="rviz" type="rviz" />
+	<node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" />
 
 
 </launch>
