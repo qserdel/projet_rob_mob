@@ -67,20 +67,14 @@ class Env:
             candidate = pt
         newstate = candidate
         if Env.dist(state, newstate) < 2 :
-            action = self.random_action(state)
-            candidate = [state[0] + action[0], state[1] + action[1]]
-            pt = self.intersect_discret(state[0],state[1],candidate[0],candidate[1])
-            if not pt:
-                newstate = candidate
+            return False
         return newstate
 
     def intersect_discret(self,x1,y1,x2,y2):
         """
         Discretise un segment et retourne son intersection avec l'environnement si elle existe, false sinon
         """
-        rospy.loginfo("test collision [%f,%f] et [%f,%f]",x1,y1,x2,y2)
         norm = math.sqrt((y2-y1)**2 + (x2-x1)**2)
-        rospy.loginfo("norm = %f",norm)
         if(norm == 0):
             return False
         dx = (x2-x1)/norm
@@ -88,16 +82,14 @@ class Env:
         i = 0
         xi = x1
         yi = y1
-        #if not self.mat[int(xi)][int(yi)] == 0 :
-         #   return [xi,yi]
+        if not self.mat[int(xi)][int(yi)] == 0 :
+            return [xi,yi]
         imax = int(max(abs(x2-x1),abs(y2-y1)))
         for i in range(1,imax):
             xi = x1+i*dx
             yi = y1+i*dy
-            if not self.mat[int(xi)][int(yi)] == 0 :
-                rospy.loginfo("collision !!!!")
+            if not self.mat[int(math.floor(xi))][int(math.floor(yi))] == 0 :
                 return [int(xi-dx),int(yi-dy)]
-        print("pas collision")
         return False
 
 
@@ -116,29 +108,38 @@ def rrt_expansion(t, env, action_type, cible):
     """
     Expansion d'un seul rrt avec une methode choisie
     """
+    nodes_libres=[]
     nearest_neighbor = t
     if(action_type == 'random'):
-      sample = [int(random.uniform(0, w-1)), int(random.uniform(0, h-1))]
-      while not (env.mat[sample[0],sample[1]]==0):
         sample = [int(random.uniform(0, w-1)), int(random.uniform(0, h-1))]
-      d = Env.dist(t.state, sample)
-      for s in t.all_nodes:
-        d_tmp = Env.dist(s.state, sample)
-        if d_tmp < d:
-            nearest_neighbor = s
-            d = d_tmp
-      action = env.oriented_action(nearest_neighbor.state,sample)
+        while not (env.mat[sample[0]][sample[1]]==0):
+            sample = [int(random.uniform(0, w-1)), int(random.uniform(0, h-1))]
+        d = Env.dist(t.state, sample)
+        for s in t.all_nodes:
+            d_tmp = Env.dist(s.state, sample)
+            if d_tmp < d:
+                nearest_neighbor = s
+                d = d_tmp
+        action = env.oriented_action(nearest_neighbor.state,sample)
     else :
-      sample = cible
-      d = Env.dist(t.state, sample)
-      for s in t.all_nodes:
-          d_tmp = Env.dist(s.state, sample)
-          if d_tmp < d:
-              nearest_neighbor = s
-              d = d_tmp
-      action = env.oriented_action(nearest_neighbor.state,sample)
-      #rospy.loginfo("distance min : %f\t--> 0",d)
-    new_state = env.step(nearest_neighbor.state, action)
+        sample = cible
+        d = Env.dist(t.state, sample)
+        for s in t.all_nodes:
+            d_tmp = Env.dist(s.state, sample)
+            if not env.intersect_discret(s.state[0],s.state[1],sample[0],sample[1]) :
+                nodes_libres.append(s)
+            if d_tmp < d :
+                nearest_neighbor = s
+                d = d_tmp
+        if not nodes_libres==[]:
+            d_tmp = Env.dist(nodes_libres[0].state,sample)
+        for s in nodes_libres:
+            if Env.dist(s.state,sample) <= d_tmp :
+                d_tmp = Env.dist(s.state,sample)
+                nearest_neighbor = s
+                d = d_tmp
+        action = env.oriented_action(nearest_neighbor.state,sample)
+    new_state = env.step(nearest_neighbor.state,action)
     if new_state:
         new_node = Tree(new_state, nearest_neighbor)
         nearest_neighbor.successors.append(new_node)
@@ -219,7 +220,6 @@ def simplify_path(path_tree, env):
         while len(node2.successors) > 0 :
             node2 = node2.successors[0]
             if not env.intersect_discret(node.state[0],node.state[1],node2.state[0],node2.state[1]):
-                rospy.loginfo("free path between [%f,%f] and [%f,%f]",node.state[0],node.state[1],node2.state[0],node2.state[1])
                 node.successors[0] = node2
         node = node.successors[0]
         path_tree.all_nodes.append(node)
@@ -254,7 +254,6 @@ def transcription_map_repere(pixel,map_origin,resolution):
     x = (pixel[0]+0.5)*resolution+map_origin.x
     y = (pixel[1]+0.5)*resolution+map_origin.y
     point = Point(x,y,0)
-    #rospy.loginfo("pixel : [%d,%d] -> [%f,%f]",pixel[0],pixel[1],point.x,point.y)
     return point
 
 def transcription_repere_map(point,map_origin,resolution):
@@ -264,7 +263,6 @@ def transcription_repere_map(point,map_origin,resolution):
     x = int((point.x-map_origin.x)/resolution)
     y = int((point.y-map_origin.y)/resolution)
     pixel = [x,y]
-    #rospy.loginfo("point : [%f,%f] -> [%d,%d]",point.x,point.y,pixel[0],pixel[1])
     return pixel
 
 # main
@@ -277,7 +275,7 @@ if __name__ == '__main__':
     # topic de l'objectif du rrt
     obj_caller = Obj_caller()
     rospy.Subscriber("move_base_simple/goal",PoseStamped,obj_caller.objectiveCallback)
-    obj_caller.obj = Point(-10,-0.1,0)
+    obj_caller.obj = Point(-10,-4,0)
 
     while not rospy.is_shutdown():
         rospy.loginfo("on entre dans la boucle du rrt")
@@ -300,10 +298,8 @@ if __name__ == '__main__':
             rospy.loginfo("origine : [%f,%f]",map_origin.x,map_origin.y)
             rospy.loginfo("resolution : %f",map_resolution)
             for i in range (w):
-                if i%100==0:
-                    rospy.loginfo("transcription binary_map : %d/%d",i,w)
                 map[i] = bm[i*w:i*w+h]
-            print("binary map ok")
+            rospy.loginfo("binary map ok")
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
 
@@ -316,7 +312,7 @@ if __name__ == '__main__':
         t = Tree([pos_pixel[1],pos_pixel[0]])
         t2 = Tree([obj_pixel[1],obj_pixel[0]])
 
-        print("execution du rrt connect ...")
+        rospy.loginfo("execution du rrt connect ...")
         # creation du publisher pour l'affichage des segments
         segmentPub = rospy.Publisher('segments_rrt',ListePoints,queue_size=100,latch=True)
         for i in range(5):
